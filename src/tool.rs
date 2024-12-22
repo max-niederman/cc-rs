@@ -140,8 +140,17 @@ impl Tool {
             tmp_file.sync_data()?;
             drop(tmp_file);
 
+            let mut cmd = Command::new(path);
+            cmd.arg("-E");
+            if compiler.family == (ToolFamily::Msvc { clang_cl: true }) {
+                // #513: For `clang-cl`, separate flags/options from the input file.
+                // When cross-compiling macOS -> Windows, this avoids interpreting
+                // common `/Users/...` paths as the `/U` flag and triggering
+                // `-Wslash-u-filename` warning.
+                cmd.arg("--");
+            }
             let stdout = run_output(
-                Command::new(path).arg("-E").arg(tmp.path()),
+                cmd.arg(tmp.path()),
                 path,
                 // When expanding the file, the compiler prints a lot of information to stderr
                 // that it is not an error, but related to expanding itself.
