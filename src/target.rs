@@ -57,6 +57,18 @@ impl FromStr for TargetInfo<'_> {
         {
             let (_, info) = &generated::LIST[index];
             Ok(info.clone())
+        } else if target_triple == "armv7a-vex-v5" {
+            // FIXME: Once `armv7a-vex-v5` is in nightly, we can remove this special case.
+            // This is a temporary target set so that we can bootstrap `armv7a-vex-v5`.
+            Ok(TargetInfo {
+                full_arch: "armv7a",
+                arch: "arm",
+                vendor: "vex",
+                os: "vexos",
+                env: "v5",
+                abi: "eabihf",
+                unversioned_llvm_target: "armv7a-none-eabihf",
+            })
         } else {
             Err(Error::new(
                 ErrorKind::InvalidTarget,
